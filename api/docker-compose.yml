@@ -1,0 +1,28 @@
+# version: "3.8"
+services:
+  tears_db:
+    image: postgres:15
+    container_name: tears-api
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: tears
+    ports:
+      - "5432:5432"
+    volumes:
+      - tears_db_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    depends_on:
+      - tears_db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@tears_db:5432/tears
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  tears_db_data:

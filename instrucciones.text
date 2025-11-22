@@ -1,0 +1,14 @@
+##
+Hola Daniel, buenos dias. Como comentamos ayer, vamos a intentar realizar
+el proyecto de nuevo, tu primera tarea seria:
+
+Desarrollar un backend para una app de mensajeria con 3 entidades sencillas:
+Usuarios, Conversaciones, Mensajes. 
+
+Usa el stack y lenguaje de tu preferencia, tienen que contar con todos los 
+endpoints necesarios para poder funcionar como un app real y contar 
+con la logica + endpoints de autenticacion.
+
+---
+
+Una vez completes esta tarea te compartire la siguiente
