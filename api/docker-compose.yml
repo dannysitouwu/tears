@@ -13,12 +13,27 @@ services:
     volumes:
       - tears_db_data:/var/lib/postgresql/data
 
+  analytics_db:
+    image: postgres:15
+    container_name: tears-analytics
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: analytics_tears
+    ports:
+      - "5433:5432"
+    volumes:
+      - analytics_db_data:/var/lib/postgresql/data
+
   api:
     build: .
     depends_on:
       - tears_db
+      - analytics_db
     environment:
       DATABASE_URL: postgresql://postgres:postgres@tears_db:5432/tears
+      ANALYTICS_DATABASE_URL: postgresql://postgres:postgres@analytics_db:5432/analytics_tears
     ports:
       - "8000:8000"
     volumes:
@@ -26,3 +41,4 @@ services:
 
 volumes:
   tears_db_data:
+  analytics_db_data:

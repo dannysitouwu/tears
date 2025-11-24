@@ -1,3 +1,53 @@
 tears/
 __pycache__/
 *.pyc
+
+# virtualenv
+tears/
+.venv/
+venv/
+
+# env files / secrets
+.env
+.env.* 
+
+# editor / system
+.vscode/
+.DS_Store
+
+# python build/cache
+__pycache__/
+*.pyc
+
+# docker / logs
+.dockerignore
+*.log
+
+instrucciones.txt
+
+#db info
+
+# database / analytics
+*.db
+*.sqlite
+*.sqlite3
+analytics.db
+
+# IDEs / editors
+.idea/
+.project
+.vscode/
+
+# test / coverage
+.pytest_cache/
+.coverage
+
+# packaging
+dist/
+build/
+
+# python egg
+*.egg-info/
+
+# logs
+*.log
