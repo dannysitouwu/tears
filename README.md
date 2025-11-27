@@ -1,9 +1,15 @@
 - python3 -m venv tears
 entrono virtual paera evitar conflicot con versiones y librerias
-
+(3.9.6)
 
 - source tears/bin/activate 
 para activarlo y instalar todo en el entorno
+
+
+- cd api - pip install -r requirements.txt
+para poder installar las dependencias exactas locales, para el correcto funconamiento
+
+- requirements.in se mantiene como el original, con l adiferencia de .in en lugar de .txt para no renerar conflitos
 
 
 - pip install '/'
