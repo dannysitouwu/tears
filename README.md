@@ -28,6 +28,7 @@ guardar ese tipo de informacion valiosa del usuario en la db
 
 
 #! implementar cuando posible: refresh token - expires_in - scope
+#! arreglar el funcionamiento del elt (funciona, pero puede mejorar tanto en logica como msj de consola)
 
-- python api/scripts/faker_populate.py --chats 5000 --members 5000 --messages 5000
+- python data/generator.py --min-users 0 --messages 0 --chats 0 --members 0 --messages 0
 para generar los datos 

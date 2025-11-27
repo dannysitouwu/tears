@@ -51,3 +51,8 @@ build/
 
 # logs
 *.log
+*analytics_logs.txt
+
+# temporal
+temporal-logs/
+temporal_client.py

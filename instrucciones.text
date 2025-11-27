@@ -1,5 +1,4 @@
-Great, now 2 things:
-•⁠  ⁠faker script, it fills all the non authentication related 
-tables with fake data (let’s do ~5k rows each)
-•⁠  ⁠⁠ETL, pulls raw data from the api db tables, formats it and saves
- it to a new db with new structure, relevant for analysis
+Next step: turn the ETL into a Temporal workflow.
+host temporal locally in docker, refactor the ETL script 
+to accommodate the temporal pattern for workflows. 
+Should you have any questions I’d be happy to help
