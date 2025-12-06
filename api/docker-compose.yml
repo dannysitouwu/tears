@@ -2,7 +2,6 @@
 services:
   tears_db:
     image: postgres:15
-    container_name: tears-api
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: postgres
@@ -15,7 +14,6 @@ services:
 
   analytics_db:
     image: postgres:15
-    container_name: tears-analytics
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: postgres
@@ -39,6 +37,75 @@ services:
     volumes:
       - ./app:/app/app
 
+  # temporal_db:
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: temporal
+  #     POSTGRES_PASSWORD: temporal
+  #     POSTGRES_DB: temporal
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U temporal -d temporal"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 30
+  #   ports:
+  #     - "5434:5432"
+  #   volumes:
+  #     - temporal_db_data:/var/lib/postgresql/data
+
+  # temporal:
+  #   image: temporalio/auto-setup:1.22.2
+  #   restart: unless-stopped
+  #   environment:
+  #     DB: postgres12
+  #     POSTGRES_SEEDS: "temporal_db"
+  #     POSTGRES_USER: temporal
+  #     POSTGRES_PWD: temporal
+  #     POSTGRES_DB: temporal
+  #   ports:
+  #     - "7233:7233"
+  #   depends_on:
+  #     temporal_db:
+  #       condition: service_healthy
+
+  # temporal_ui:
+  #   image: temporalio/web:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     TEMPORAL_GRPC_ENDPOINT: "temporal:7233"
+  #   ports:
+  #     - "8088:8088"
+  #   depends_on:
+  #     - temporal
+
+  metabase:
+    image: metabase/metabase:v0.57.x
+    restart: unless-stopped
+    environment:
+      MB_JETTY_HOST: 0.0.0.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - metabase_data:/metabase.db
+    depends_on:
+      - analytics_db
+
+  # spark:
+  #   image: apache/spark:4.1.0-preview4-scala2.13-java21-python3-r-ubuntu
+  #   restart: unless-stopped
+  #   command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+  #   ports:
+  #     - "8080:8080" # Spark web UI
+  #     - "7077:7077" # Spark master
+  #   volumes:
+  #     - spark_logs:/opt/spark/logs
+  #   depends_on:
+  #     - analytics_db
+
 volumes:
   tears_db_data:
   analytics_db_data:
+  # temporal_db_data:
+  metabase_data:
+  # spark_logs: 

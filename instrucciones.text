@@ -1,4 +1,0 @@
-Next step: turn the ETL into a Temporal workflow.
-host temporal locally in docker, refactor the ETL script 
-to accommodate the temporal pattern for workflows. 
-Should you have any questions I’d be happy to help

@@ -15,7 +15,22 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporal.workflows import ETLWorkflow
-from temporal.activities import run_etl_activity
+from temporal.activities import (
+    run_etl,
+    prepare_etl,
+    extract_messages,
+    transform_messages,
+    load_messages,
+    extract_users,
+    transform_users,
+    load_users,
+    extract_chats,
+    transform_chats,
+    load_chats,
+    extract_chat_members,
+    transform_chat_members,
+    load_chat_members,
+)
 
 async def main():
     temporal_addr = os.getenv("TEMPORAL_LOCAL_ADDRESS", "localhost:7233")
@@ -31,7 +46,28 @@ async def main():
     task_queue = os.getenv("ETL_TASK_QUEUE", "etl-task-queue")
     print(f"Worker connecting to {temporal_addr}, task queue {task_queue}")
 
-    worker = Worker(client, task_queue=task_queue, workflows=[ETLWorkflow], activities=[run_etl_activity])
+    worker = Worker(
+        client,
+        task_queue=task_queue,
+        workflows=[ETLWorkflow],
+        activities=[
+            run_etl,
+            # activities
+            prepare_etl,
+            extract_messages,
+            transform_messages,
+            load_messages,
+            extract_users,
+            transform_users,
+            load_users,
+            extract_chats,
+            transform_chats,
+            load_chats,
+            extract_chat_members,
+            transform_chat_members,
+            load_chat_members,
+        ],
+    )
     await worker.run()
 
 if __name__ == "__main__":
