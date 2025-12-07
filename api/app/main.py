@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query, Depends, HTTPException, status, APIRouter, security
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from prometheus_fastapi_instrumentator import Instrumentator
 from .security import decode_access_token, create_access_token, verify_password
 from sqlalchemy.orm import Session
 from .database import SessionLocal, engine
@@ -12,6 +13,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 app = FastAPI(title='tears API')
 
+Instrumentator().instrument(app).expose(app)
+
 models.Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -20,6 +23,7 @@ def get_db():
 		yield db
 	finally:
 		db.close()
+		db.bind.dispose()
 # auth
 @router.post("/register", response_model=schemas.UserOut)
 def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):

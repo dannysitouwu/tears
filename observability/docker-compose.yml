@@ -34,7 +34,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     restart: unless-stopped
     volumes:
-      - ./loki/local-config-clean.yaml:/etc/loki/local-config.yaml:ro
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml:ro
       - ./loki/data:/loki
     ports:
       - 127.0.0.1:3100:3100
@@ -70,6 +70,26 @@ services:
       - 127.0.0.1:9187:9187
     networks:
       - observability
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminadmin
+      - DOCKER_INFLUXDB_INIT_ORG=tears
+      - DOCKER_INFLUXDB_INIT_BUCKET=k6
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-auth-token
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - observability
+
+volumes:
+  influxdb_data: 
 
 networks:
   observability:

@@ -57,3 +57,12 @@ build/
 # temporal
 temporal-logs/
 temporal_client.py
+
+# loki data
+observability/loki/data/
+
+#observability env
+observability/.env
+
+results.json
+summary.json
