@@ -76,4 +76,4 @@ http://localhost:3000/dashboard/3-tears-dashboard
 (tears) dannysito@dannysitos-MacBook tears % k6 run tests/k6/stress-test.js
 
 - cd tears-frontend -> npm run dev
-para correr el fontend ( http://localhost:5173/ )
+para correr el fontend ( http://localhost:5173/ )test
