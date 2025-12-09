@@ -77,3 +77,4 @@ http://localhost:3000/dashboard/3-tears-dashboard
 
 - cd tears-frontend -> npm run dev
 para correr el fontend ( http://localhost:5173/ )test
+test deploy
