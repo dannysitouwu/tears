@@ -1,3 +1,26 @@
+# Tears Project
+
+## Configuración Inicial de Git / Git Initial Setup
+
+Si tienes problemas para hacer pull del repositorio, ejecuta:
+If you have problems doing git pull, run:
+
+```bash
+./setup-git.sh
+```
+
+O manualmente / Or manually:
+```bash
+git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+git fetch origin
+```
+
+Ver más detalles en [GIT_HELP.md](GIT_HELP.md)
+
+---
+
+## Setup del Entorno / Environment Setup
+
 - python3 -m venv tears
 entrono virtual paera evitar conflicot con versiones y librerias
 (3.9.6)
