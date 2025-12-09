@@ -3,8 +3,6 @@ services:
     image: prom/prometheus:main
     container_name: prometheus
     volumes:
-      # the repo contains a directory named `prometheus.yml`; mount it as a directory
-      # so the container has /etc/prometheus/prometheus.yml inside the mounted dir.
       - ./prometheus/prometheus.yml:/etc/prometheus:ro
     ports:
       - 127.0.0.1:9090:9090

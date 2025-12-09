@@ -70,3 +70,10 @@ python run_worker.py
 python run_workflow.py
 
 http://localhost:3000/dashboard/3-tears-dashboard
+
+(tears) dannysito@dannysitos-MacBook tears % k6 run tests/k6/load-test.js
+
+(tears) dannysito@dannysitos-MacBook tears % k6 run tests/k6/stress-test.js
+
+- cd tears-frontend -> npm run dev
+para correr el fontend ( http://localhost:5173/ )

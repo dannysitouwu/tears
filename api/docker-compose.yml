@@ -23,6 +23,16 @@ services:
       - "5433:5432"
     volumes:
       - analytics_db_data:/var/lib/postgresql/data
+  
+  # postgres-exporter:
+  #   image: prometheuscommunity/postgres-exporter:latest
+  #   container_name: tears-postgres-exporter
+  #   environment:
+  #     DATA_SOURCE_NAME: "postgresql://postgres:postgres@tears_db:5432/tears?sslmode=disable"
+  #   ports:
+  #     - "9187:9187"
+  #   depends_on:
+  #     - tears_db
 
   api:
     build: .
@@ -36,6 +46,9 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app/app
+    labels:
+      logging: "promtail"
+      logging_jobname: "tears-api"
 
   # temporal_db:
   #   image: postgres:15

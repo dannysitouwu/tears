@@ -29,17 +29,22 @@ class Token(BaseModel):
 class ChatCreate(BaseModel):
     name: str
     is_private: bool = False
+    allow_anonymous: bool = False 
 
 class ChatOut(BaseModel):
     id: int
     name: str
     is_private: bool
     created_at: datetime
+    member_count: int = 0
+    message_count: int = 0
+    role: Optional[str] = None 
     class Config:
         from_attributes = True
 
 class MemberCreate(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
+    username: Optional[str] = None
 
 # for messages created from /chats/{id}/messages
 class ChatMessageCreate(BaseModel):
@@ -55,6 +60,8 @@ class MessageOut(BaseModel):
     id: int
     chat_id: int
     user_id: int
+    username: Optional[str]
+    display_name: Optional[str]
     content: str
     created_at: datetime
     class Config:

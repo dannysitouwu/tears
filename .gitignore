@@ -66,3 +66,4 @@ observability/.env
 
 results.json
 summary.json
+load-test-report.html
