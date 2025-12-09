@@ -1,10 +1,20 @@
 #!/bin/bash
 
+# Exit on any error
+set -e
+
 # Script para configurar o Git corretamente para este repositório
 # This script configures Git to allow pulling from all branches
 
 echo "Configurando Git para permitir pull de todos os branches..."
 echo "Configuring Git to allow pulling from all branches..."
+
+# Check if origin remote exists
+if ! git remote | grep -q "^origin$"; then
+    echo "Error: Remote 'origin' não existe / 'origin' remote does not exist"
+    echo "Execute: git remote add origin https://github.com/dannysitouwu/tears"
+    exit 1
+fi
 
 # Atualizar a configuração do remote para buscar todos os branches
 # Update remote configuration to fetch all branches
