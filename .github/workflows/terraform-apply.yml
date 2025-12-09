@@ -1,0 +1,86 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-apply.yml'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./terraform
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.6.0
+    
+    - name: Terraform Init
+      run: terraform init
+      env:
+        HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+    
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -out=tfplan
+      env:
+        TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+    
+    - name: Terraform Apply
+      if: github.event.inputs.action != 'destroy'
+      run: terraform apply -auto-approve tfplan
+      env:
+        TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+    
+    - name: Terraform Destroy
+      if: github.event.inputs.action == 'destroy'
+      run: terraform destroy -auto-approve
+      env:
+        TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+    
+    - name: Save Terraform Outputs
+      if: github.event.inputs.action != 'destroy'
+      id: outputs
+      run: |
+        echo "backend_ip=$(terraform output -raw backend_server_ip)" >> $GITHUB_OUTPUT
+        echo "ssh_connection=$(terraform output -raw ssh_connection)" >> $GITHUB_OUTPUT
+        echo "api_url=$(terraform output -raw api_url)" >> $GITHUB_OUTPUT
+        echo "grafana_url=$(terraform output -raw grafana_url)" >> $GITHUB_OUTPUT
+    
+    - name: Create deployment summary
+      if: github.event.inputs.action != 'destroy'
+      run: |
+        echo "## Terraform Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Infrastructure Details" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend Server IP**: ${{ steps.outputs.outputs.backend_ip }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **SSH Connection**: \`${{ steps.outputs.outputs.ssh_connection }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **API URL**: ${{ steps.outputs.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Grafana URL**: ${{ steps.outputs.outputs.grafana_url }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "1. Configure DNS to point to the server IP" >> $GITHUB_STEP_SUMMARY
+        echo "2. Setup SSL with Let's Encrypt: \`ssh root@${{ steps.outputs.outputs.backend_ip }} 'certbot --nginx -d yourdomain.com'\`" >> $GITHUB_STEP_SUMMARY
+        echo "3. Access Grafana and configure dashboards" >> $GITHUB_STEP_SUMMARY

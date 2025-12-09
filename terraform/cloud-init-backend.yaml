@@ -1,0 +1,102 @@
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - git
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+
+write_files:
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+
+runcmd:
+  # Enable and start Docker
+  - systemctl enable docker
+  - systemctl start docker
+  
+  # Add ubuntu user to docker group
+  - usermod -aG docker ubuntu
+  
+  # Clone repository
+  - mkdir -p /opt/tears
+  - git clone ${github_repo} /opt/tears
+  - cd /opt/tears
+  
+  # Mount PostgreSQL volume
+  - mkdir -p /mnt/postgres-data
+  - mount /dev/disk/by-id/scsi-0HC_Volume_* /mnt/postgres-data
+  - echo "/dev/disk/by-id/scsi-0HC_Volume_* /mnt/postgres-data ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+  
+  # Update docker-compose to use volume
+  - sed -i 's|./data/postgres|/mnt/postgres-data|g' /opt/tears/api/docker-compose.yml
+  
+  # Start services
+  - cd /opt/tears/api && docker-compose up -d
+  - cd /opt/tears/observability && docker-compose up -d
+  
+  # Configure nginx
+  - |
+    cat > /etc/nginx/sites-available/tears << 'EOF'
+    server {
+        listen 80;
+        server_name _;
+        
+        # Frontend
+        location / {
+            root /opt/tears/tears-frontend/dist;
+            try_files $uri $uri/ /index.html;
+        }
+        
+        # Backend API
+        location /api/ {
+            proxy_pass http://localhost:8000/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        # WebSocket
+        location /ws/ {
+            proxy_pass http://localhost:8000/ws/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_read_timeout 86400;
+        }
+        
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }
+    EOF
+  
+  - ln -sf /etc/nginx/sites-available/tears /etc/nginx/sites-enabled/tears
+  - rm -f /etc/nginx/sites-enabled/default
+  - nginx -t && systemctl reload nginx
+  
+  # Setup automatic updates
+  - apt-get install -y unattended-upgrades
+  - dpkg-reconfigure -plow unattended-upgrades
+
+final_message: "Tears application deployed successfully!"
