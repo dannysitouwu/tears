@@ -1,0 +1,102 @@
+# Configuração Promtail Atualizada
+# Local: /observability/promtail/config.yml
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Job existente para logs da API
+  - job_name: tears-api
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(tears-api-1)'
+        target_label: 'job'
+        replacement: 'tears-api'
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+
+  # NOVO: Job para logs do Frontend (Nginx)
+  - job_name: tears-frontend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: tears-frontend
+          __path__: /var/log/nginx/tears-frontend-access.log
+
+    # Pipeline para processar logs JSON do Nginx
+    pipeline_stages:
+      # Stage 1: Parse JSON
+      - json:
+          expressions:
+            timestamp: timestamp
+            remote_addr: remote_addr
+            remote_user: remote_user
+            request: request
+            status: status
+            body_bytes_sent: body_bytes_sent
+            request_time: request_time
+            http_referer: http_referer
+            http_user_agent: http_user_agent
+            http_x_forwarded_for: http_x_forwarded_for
+
+      # Stage 2: Extrair informações adicionais da request
+      - regex:
+          expression: '^(?P<method>\S+)\s+(?P<path>\S+)\s+(?P<protocol>\S+)$'
+          source: request
+
+      # Stage 3: Criar labels para facilitar queries
+      - labels:
+          status:
+          remote_addr:
+          method:
+          path:
+          http_user_agent:
+
+      # Stage 4: Adicionar métricas
+      - metrics:
+          request_duration_seconds:
+            type: Histogram
+            description: "Request duration in seconds"
+            source: request_time
+            config:
+              buckets: [0.1, 0.5, 1, 2, 5]
+
+      # Stage 5: Parse timestamp do Nginx
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+          fallback_formats:
+            - "2006-01-02T15:04:05-07:00"
+            - "2006-01-02T15:04:05.000-07:00"
+
+      # Stage 6: Output final
+      - output:
+          source: message
+
+  # Job existente para logs do PostgreSQL (se existir)
+  - job_name: tears-postgres
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(tears-db-1|tears-postgres-1)'
+        target_label: 'job'
+        replacement: 'tears-postgres'
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
