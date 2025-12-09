@@ -1,0 +1,47 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'tears-frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  push:
+    branches: [ develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: tears-frontend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./tears-frontend
+      run: npm ci
+    
+    - name: Run linter
+      working-directory: ./tears-frontend
+      run: npm run lint
+    
+    - name: Run tests
+      working-directory: ./tears-frontend
+      run: npm test -- --coverage
+    
+    - name: Build
+      working-directory: ./tears-frontend
+      run: npm run build
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./tears-frontend/coverage
+        flags: frontend
+        name: frontend-coverage

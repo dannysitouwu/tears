@@ -80,7 +80,10 @@ Instrumentator().instrument(app).expose(app)
 
 app.middleware("http")(metrics_middleware)
 
-models.Base.metadata.create_all(bind=engine)
+# Only create tables if not in test mode
+import sys
+if "pytest" not in sys.modules:
+    models.Base.metadata.create_all(bind=engine)
 
 app.include_router(router)
 

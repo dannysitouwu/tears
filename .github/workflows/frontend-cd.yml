@@ -1,0 +1,46 @@
+name: Frontend CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tears-frontend/**'
+      - '.github/workflows/frontend-cd.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Install dependencies and build
+      working-directory: ./tears-frontend
+      run: |
+        npm ci
+        npm run build
+    
+    - name: Deploy to Hetzner
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "tears-frontend/dist/*"
+        target: "/path/to/web/root"
+        strip_components: 2
+    
+    - name: Restart web server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sudo systemctl restart nginx
+          # Or if using Docker: docker-compose restart frontend
