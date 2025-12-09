@@ -1,0 +1,20 @@
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to git!
+
+hcloud_token    = "YOUR_HETZNER_CLOUD_API_TOKEN"
+ssh_public_key  = "ssh-rsa AAAAB3NzaC1yc2E... your-email@example.com"
+server_type     = "cx22"  # 2 vCPU, 4GB RAM
+location        = "nbg1"  # Nuremberg, Germany
+environment     = "production"
+github_repo     = "https://github.com/dannysitouwu/tears.git"
+
+# PostgreSQL volume size in GB
+postgres_volume_size = 10
+
+# IP addresses allowed to access Grafana/Prometheus (use your IP for security)
+monitoring_allowed_ips = [
+  "0.0.0.0/0"  # WARNING: Change this to your IP address!
+]
+
+# Enable load balancer for high availability (costs extra)
+enable_load_balancer = false
