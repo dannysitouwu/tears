@@ -25,7 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("tears-api")
 
-# Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
 	if request.url.path == "/metrics":
@@ -273,12 +272,12 @@ def get_chat(chat_id: int, db: Session = Depends(get_db), me=Depends(get_current
 
 @app.get('/chats/{chat_id}/messages', response_model=dict)
 def chat_messages(chat_id: int, page: int = Query(1, ge=1), per_page: int = Query(50, ge=1, le=250), db: Session = Depends(get_db), me=Depends(get_current_user_optional)):
-	# Check if chat exists
+	# check if chat exists
 	chat = crud.get_chat(db, chat_id)
 	if not chat:
 		raise HTTPException(status_code=404, detail="Chat not found")
 	
-	# If chat is private, only members can view messages
+	# if chat is private, only members can view messages
 	if chat.is_private and me:
 		if not crud.user_is_participant(db, chat_id, me.id):
 			raise HTTPException(status_code=403, detail="Not a participant")
